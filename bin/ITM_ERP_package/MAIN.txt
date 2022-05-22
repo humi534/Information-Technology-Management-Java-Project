@@ -1,0 +1,265 @@
+package ITM_ERP_package;
+
+import java.sql.*;
+import java.util.Scanner;
+
+public class Main {
+	public static void main(String[] args) {
+		
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch(ClassNotFoundException e) {
+			System.out.println("Driver not found");
+			e.printStackTrace();
+			return;
+		}
+		
+		//System.out.println("MySQL JDBC Driver Registered!");
+		Connection connection = null;
+		
+		try {
+			connection = DriverManager.getConnection("jdbc:mysql://localhost/itm_erp_db","root","123");
+			//System.out.println("Connection with database successful");
+		}
+		catch(SQLException e)
+		{
+			System.out.println("Connexion Failed! Check output console");
+			e.printStackTrace();
+			return;
+		}
+		
+		System.out.println("Please enter one of the followingg command:");
+		System.out.println("    - Create new customer");
+		System.out.println("    - Create new product");
+		System.out.println("    - Create new sale");
+		System.out.println("    - Search customer");
+		System.out.println("    - Search product");
+		System.out.println("    - Search sale");
+		
+		boolean exit = false;
+		Scanner sn = new Scanner(System.in);
+		while(exit==false)
+		{
+			
+			String userInput = sn.nextLine();
+			
+			if(userInput.equals("quit"))
+			{
+				exit = true;
+			}
+			else 
+			{
+				userInputAnalysis(userInput, connection);
+			}
+			
+		}
+		sn.close();
+	}
+	
+	public static void userInputAnalysis(String userInput, Connection connection)
+	{
+		System.out.println(userInput);
+		String[] words = userInput.split(" ");
+		
+		if(words[0].toLowerCase().equals("create"))
+		{
+			try {
+				System.out.println("vous avez lanc� une fonction create");
+				if(words[2].toLowerCase().equals("customer"))
+				{
+					createNewCustomer(connection);
+				}
+				else if(words[2].toLowerCase().equals("product"))
+				{
+					createNewProduct(connection);
+				}
+				else if(words[2].toLowerCase().equals("sale"))
+				{
+					createNewSale(connection);
+				}
+				else { //the user did not write a correct word
+					System.out.println("your third word must be customer or product or sale");
+				}
+			} catch(Exception e)
+			{
+				System.out.println("Please write a correct command");
+			}
+			
+		}
+		
+		
+		else if (words[0].toLowerCase().equals("search"))
+		{
+			System.out.println("vous avez lanc� une fonction search");
+		}
+		else 
+		{
+			System.out.println("Your first word must be Search or Create");
+		}
+		
+		
+	}
+	
+	public static void createNewCustomer(Connection connection)
+	{		
+		Scanner scan_customer = new Scanner(System.in);
+		
+		System.out.println("Please enter the lastname");
+		String lastname = scan_customer.nextLine();
+		
+		System.out.println("Please enter the forename");
+		String forename = scan_customer.nextLine();
+		
+		System.out.println("Please enter the street name");
+		String streetname = scan_customer.nextLine();
+		
+		System.out.println("Please enter the house number");
+		int housenumber = scan_customer.nextInt();
+		scan_customer.nextLine();
+		
+		System.out.println("Please enter the city");
+		String city = scan_customer.nextLine();
+		
+		System.out.println("Please enter the postal code");
+		String postalcode = scan_customer.nextLine();
+		
+		System.out.println("Please enter the email address");
+		String email = scan_customer.nextLine();
+		
+		System.out.println("Please enter the credit limit");
+		int creditlimit = scan_customer.nextInt();
+		
+		if(connection !=null) {
+			try {
+				String query = "INSERT INTO customers(lastname, forename, streetname, housenumber, city, postalcode, email, creditlimit) VALUES (?,?,?,?,?,?,?,?);";
+				PreparedStatement pstmt = connection.prepareStatement(query);
+				pstmt.setString(1, lastname);
+				pstmt.setString(2, forename);
+				pstmt.setString(3, streetname);
+				pstmt.setInt(4, housenumber);
+				pstmt.setString(5, city);
+				pstmt.setString(6, postalcode);
+				pstmt.setString(7, email);
+				pstmt.setInt(8, creditlimit);
+				pstmt.executeUpdate();
+				System.out.println("Customer successfully registered");
+			}
+			catch(Exception e) {
+				System.out.println("An error occured");
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
+	
+	
+	/*
+	//insert Product Statement 
+	if(connection !=null) {
+		try {				
+			PreparedStatement pstmt = connection.prepareStatement("INSERT INTO products VALUES (?, ?, ?, ?)");
+			pstmt.setString(1, "VTT");
+			pstmt.setString(2, "VTT001");
+			pstmt.setInt(3, 600);
+			pstmt.setInt(4, 80);
+			pstmt.executeUpdate();
+		}
+		catch(Exception e) {
+			System.out.println("This data already exists");
+			//e.printStackTrace();
+		}
+	}
+	*/
+	
+	/*
+	//Select Statement
+	if(connection !=null) {
+		try {
+			String query = "Select* From products;";
+			Statement stmt = connection.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			while(rs.next())
+			{
+				String name = rs.getString("name");
+				String code = rs.getString("code");
+				int sellingprice = rs.getInt("sellingprice");
+				int stocklevel = rs.getInt("stocklevel");
+				
+				System.out.println("name: " + name + "  code: " + code + "  sellingprice: " + sellingprice + "  stocklevel: " + stocklevel);
+			}
+		}
+		catch(Exception e) {
+			System.out.println("This data already exists");
+			e.printStackTrace();
+		}
+	}
+	*/
+	
+	/*
+	public void InsertDB()
+	{
+		if(connection !=null) {
+			try {
+				String query = "INSERT INTO sales(idcustomer, codeproduct, quantity) VALUES (?,?,?);";
+				PreparedStatement pstmt = connection.prepareStatement(query);
+				pstmt.setInt(1, 6);
+				pstmt.setString(2, "VEL001");
+				pstmt.setInt(3, 50);
+				pstmt.executeUpdate();
+			}
+			catch(Exception e) {
+				System.out.println("This data already exists");
+				e.printStackTrace();
+			}
+		}
+
+		
+		
+		
+		if(connection !=null) {
+			try {
+				String query = "INSERT INTO customers(lastname, forename, streetname, housenumber, city, postalcode, email, creditlimit) VALUES (?,?,?,?,?,?,?,?);";
+				PreparedStatement pstmt = connection.prepareStatement(query);
+				pstmt.setString(1, "hugo");
+				pstmt.setString(2, "poncelet");
+				pstmt.setString(3, "Rue du Centre");
+				pstmt.setInt(4, 1);
+				pstmt.setString(5, "5340");
+				pstmt.setString(6, "Sor�e");
+				pstmt.setString(7, "hugo.poncelet@gmail.com");
+				pstmt.setInt(8, 100);
+				pstmt.executeUpdate();
+			}
+			catch(Exception e) {
+				System.out.println("This data already exists");
+				e.printStackTrace();
+			}
+		}
+		
+		
+		
+		if(connection !=null) {
+			try {				
+				PreparedStatement pstmt = connection.prepareStatement("INSERT INTO products VALUES (?, ?, ?, ?)");
+				pstmt.setString(1, "Velo");
+				pstmt.setString(2, "VEL001");
+				pstmt.setInt(3, 500);
+				pstmt.setInt(4, 100);
+				pstmt.executeUpdate();
+			}
+			catch(Exception e) {
+				System.out.println("This data already exists");
+				//e.printStackTrace();
+			}
+		}
+		
+	}
+	*/
+		
+}
+		
+	
+
+
